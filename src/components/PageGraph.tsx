@@ -26,6 +26,7 @@ type PageNodeData = {
   page: PageNode;
   projectId: string;
   onEditPage: (pageId: string) => void;
+  // Index signature required by @xyflow/react Node<T> which constrains T extends Record<string, unknown>
   [key: string]: PageNode | string | ((id: string) => void);
 };
 
