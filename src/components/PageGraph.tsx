@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   ReactFlow,
@@ -22,17 +22,16 @@ import '@xyflow/react/dist/style.css';
 import { loadProjects, saveProjects } from '../storage';
 import type { Project, PageNode } from '../types';
 
+// PageNodeData properties are all subtypes of unknown, satisfying Node<T extends Record<string, unknown>>
+// without needing an explicit index signature.
 type PageNodeData = {
   page: PageNode;
   projectId: string;
   onEditPage: (pageId: string) => void;
-  // Index signature required by @xyflow/react Node<T> which constrains T extends Record<string, unknown>
-  [key: string]: PageNode | string | ((id: string) => void);
 };
 
 type RouteEdgeData = {
   routeId: string;
-  [key: string]: string;
 };
 
 type PageFlowNode = Node<PageNodeData>;
@@ -105,21 +104,15 @@ function PageGraphInner() {
 
   const project = projectId ? projects.find((p) => p.id === projectId) : undefined;
 
-  const initialNodes = useMemo(
-    () => (project && projectId ? buildFlowNodes(project, projectId, handleEditPage) : []),
-    // Computed once on mount; ReactFlow owns node state after initialization
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
+  const [nodes, setNodes, onNodesChange] = useNodesState<PageFlowNode>([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState<RouteFlowEdge>([]);
 
-  const initialEdges = useMemo(
-    () => (project ? buildFlowEdges(project) : []),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
-
-  const [nodes, setNodes, onNodesChange] = useNodesState<PageFlowNode>(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState<RouteFlowEdge>(initialEdges);
+  useEffect(() => {
+    if (project && projectId) {
+      setNodes(buildFlowNodes(project, projectId, handleEditPage));
+      setEdges(buildFlowEdges(project));
+    }
+  }, [project, projectId, handleEditPage, setNodes, setEdges]);
 
   const onConnect: OnConnect = useCallback(
     (connection: Connection) => {

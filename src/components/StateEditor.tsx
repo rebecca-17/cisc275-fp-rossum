@@ -120,32 +120,32 @@ export default function StateEditor() {
                 <>
                   <td>
                     <input
-                      defaultValue={attr.name}
-                      onBlur={(e: React.FocusEvent<HTMLInputElement>) =>
+                      value={attr.name}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                         handleUpdateAttribute(attr.id, 'name', e.target.value)
                       }
                     />
                   </td>
                   <td>
                     <input
-                      defaultValue={attr.type}
-                      onBlur={(e: React.FocusEvent<HTMLInputElement>) =>
+                      value={attr.type}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                         handleUpdateAttribute(attr.id, 'type', e.target.value)
                       }
                     />
                   </td>
                   <td>
                     <input
-                      defaultValue={attr.defaultValue}
-                      onBlur={(e: React.FocusEvent<HTMLInputElement>) =>
+                      value={attr.defaultValue}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                         handleUpdateAttribute(attr.id, 'defaultValue', e.target.value)
                       }
                     />
                   </td>
                   <td>
                     <input
-                      defaultValue={attr.description}
-                      onBlur={(e: React.FocusEvent<HTMLInputElement>) =>
+                      value={attr.description}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                         handleUpdateAttribute(attr.id, 'description', e.target.value)
                       }
                     />
