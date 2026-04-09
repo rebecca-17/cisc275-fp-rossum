@@ -1,40 +1,29 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
-import "./App.css";
+import { HashRouter, Routes, Route } from 'react-router-dom';
+import Dashboard from './components/Dashboard';
+import ProjectOverview from './components/ProjectOverview';
+import PageGraph from './components/PageGraph';
+import PageEditor from './components/PageEditor';
+import StateEditor from './components/StateEditor';
+import LogicAnnotations from './components/LogicAnnotations';
+import CodeGenerator from './components/CodeGenerator';
+import DocxExporter from './components/DocxExporter';
+import './App.css';
 
 export function App() {
-    const [count, setCount] = useState(0);
-
-    return (
-        <>
-            <div>
-                <a href="https://vite.dev" target="_blank">
-                    <img src={viteLogo} className="logo" alt="Vite logo" />
-                </a>
-                <a href="https://react.dev" target="_blank">
-                    <img
-                        src={reactLogo}
-                        className="logo react"
-                        alt="React logo"
-                    />
-                </a>
-            </div>
-            <h1>Vite + React</h1>
-            <div className="card">
-                <button onClick={() => setCount((count) => count + 1)}>
-                    count is {count}
-                </button>
-                <p>
-                    Edit <code>src/App.tsx</code> and save to test HMR
-                </p>
-            </div>
-            <p className="read-the-docs">
-                Click on the Vite and React logos to learn more. Final project
-                template.
-            </p>
-        </>
-    );
+  return (
+    <HashRouter>
+      <Routes>
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/project/:projectId" element={<ProjectOverview />} />
+        <Route path="/project/:projectId/graph" element={<PageGraph />} />
+        <Route path="/project/:projectId/page/:pageId" element={<PageEditor />} />
+        <Route path="/project/:projectId/state" element={<StateEditor />} />
+        <Route path="/project/:projectId/logic" element={<LogicAnnotations />} />
+        <Route path="/project/:projectId/code" element={<CodeGenerator />} />
+        <Route path="/project/:projectId/export" element={<DocxExporter />} />
+      </Routes>
+    </HashRouter>
+  );
 }
 
 export default App;

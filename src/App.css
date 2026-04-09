@@ -1,42 +1,231 @@
+* {
+  box-sizing: border-box;
+}
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  padding: 1rem 2rem;
+  font-family: sans-serif;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
+/* ---- Buttons ---- */
+button {
+  padding: 6px 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #f5f5f5;
+  cursor: pointer;
+  font-size: 14px;
 }
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
-
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+button:hover {
+  background: #e8e8e8;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+/* ---- Dashboard ---- */
+.dashboard h1 {
+  font-size: 2rem;
+  color: #4a5568;
+  margin-bottom: 0.25rem;
+}
+.dashboard > p {
+  color: #718096;
+  margin-top: 0;
+}
+.dashboard-actions {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.dashboard-actions button {
+  background: #4a90d9;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  font-size: 15px;
+  border-radius: 6px;
+}
+.dashboard-actions button:hover {
+  background: #3a7bc8;
+}
+.project-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.project-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  background: #fff;
+}
+.project-item:hover {
+  background: #f7fafc;
+}
+.project-info {
+  flex: 1;
+}
+.project-info strong {
+  font-size: 16px;
+}
+.project-info small {
+  color: #718096;
+  font-size: 12px;
+  margin-left: 8px;
+}
+.project-actions {
+  display: flex;
+  gap: 8px;
 }
 
-.card {
-  padding: 2em;
+/* ---- Project Overview ---- */
+.project-overview h1 {
+  font-size: 1.75rem;
+  color: #4a5568;
+}
+.overview-nav {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 20px 0;
+}
+.overview-nav button {
+  background: #fff;
+  border: 2px solid #4a90d9;
+  color: #4a90d9;
+  font-size: 15px;
+  padding: 10px 16px;
+  border-radius: 6px;
+}
+.overview-nav button:hover {
+  background: #ebf4ff;
 }
 
-.read-the-docs {
-  color: #888;
+/* ---- Page Editor ---- */
+.page-editor h1 {
+  font-size: 1.5rem;
+  color: #4a5568;
+}
+.add-component {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  align-items: center;
+}
+.add-component select {
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}
+.component-list {
+  list-style: none;
+  padding: 0;
+}
+.component-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  margin-bottom: 6px;
+  background: #fff;
+}
+.component-item strong {
+  min-width: 80px;
+  color: #4a90d9;
+}
+.component-item input,
+.component-item select {
+  flex: 1;
+  padding: 4px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+/* ---- State Editor ---- */
+.state-editor h1 {
+  font-size: 1.5rem;
+  color: #4a5568;
+}
+.state-editor table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+}
+.state-editor th,
+.state-editor td {
+  border: 1px solid #e2e8f0;
+  padding: 8px 10px;
+  font-size: 14px;
+  text-align: left;
+}
+.state-editor th {
+  background: #f7fafc;
+  font-weight: 600;
+}
+.state-editor input {
+  width: 100%;
+  padding: 4px 6px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  font-size: 13px;
+}
+
+/* ---- Code Generator ---- */
+.code-generator h1 {
+  font-size: 1.5rem;
+  color: #4a5568;
+}
+
+/* ---- DOCX Exporter ---- */
+.docx-exporter h1 {
+  font-size: 1.5rem;
+  color: #4a5568;
+}
+
+/* ---- Logic Annotations ---- */
+.logic-annotations h1 {
+  font-size: 1.5rem;
+  color: #4a5568;
+}
+.logic-annotations input {
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+/* ---- General inputs ---- */
+input[type='text'],
+input:not([type]) {
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}
+select {
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  background: #fff;
+}
+
+/* ---- Tables ---- */
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+th,
+td {
+  border: 1px solid #e2e8f0;
+  padding: 8px 10px;
+  font-size: 14px;
 }
