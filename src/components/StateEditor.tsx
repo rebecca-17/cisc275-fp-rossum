@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { loadProjects, saveProjects } from '../storage';
-import type { StateAttribute, Dataclass } from '../types';
+import type { StateAttribute, Dataclass, Project } from '../types';
 
 function makeAttribute(): StateAttribute {
   return {
@@ -25,18 +25,17 @@ function makeDataclass(): Dataclass {
 export default function StateEditor() {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
+  const [projects, setProjects] = useState<Project[]>(() => loadProjects());
   const [editingAttr, setEditingAttr] = useState<string | null>(null);
 
   if (!projectId) return <div>Invalid project ID</div>;
 
-  const projects = loadProjects();
   const project = projects.find((p) => p.id === projectId);
   if (!project) return <div>Project not found</div>;
 
-  function saveAndReload(updated: typeof projects) {
+  function applyProjects(updated: Project[]) {
     saveProjects(updated);
-    setEditingAttr(null);
-    window.location.reload();
+    setProjects(updated);
   }
 
   function handleAddAttribute() {
@@ -45,7 +44,7 @@ export default function StateEditor() {
       if (p.id !== projectId) return p;
       return { ...p, state: { ...p.state, attributes: [...p.state.attributes, newAttr] } };
     });
-    saveAndReload(updated);
+    applyProjects(updated);
   }
 
   function handleUpdateAttribute(attrId: string, field: string, value: string) {
@@ -62,6 +61,7 @@ export default function StateEditor() {
       };
     });
     saveProjects(updated);
+    setProjects(updated);
   }
 
   function handleDeleteAttribute(attrId: string) {
@@ -75,7 +75,8 @@ export default function StateEditor() {
         },
       };
     });
-    saveAndReload(updated);
+    setEditingAttr(null);
+    applyProjects(updated);
   }
 
   function handleAddDataclass() {
@@ -84,7 +85,7 @@ export default function StateEditor() {
       if (p.id !== projectId) return p;
       return { ...p, secondaryDataclasses: [...p.secondaryDataclasses, newDc] };
     });
-    saveAndReload(updated);
+    applyProjects(updated);
   }
 
   function handleDeleteDataclass(dcId: string) {
@@ -92,7 +93,7 @@ export default function StateEditor() {
       if (p.id !== projectId) return p;
       return { ...p, secondaryDataclasses: p.secondaryDataclasses.filter((d) => d.id !== dcId) };
     });
-    saveAndReload(updated);
+    applyProjects(updated);
   }
 
   return (

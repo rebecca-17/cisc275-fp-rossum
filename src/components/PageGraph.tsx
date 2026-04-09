@@ -65,7 +65,11 @@ function PageFlowNodeComponent({ data }: NodeProps<PageFlowNode>) {
   );
 }
 
-function buildFlowNodes(project: Project, projectId: string, onEditPage: (pageId: string) => void): PageFlowNode[] {
+function buildFlowNodes(
+  project: Project,
+  projectId: string,
+  onEditPage: (pageId: string) => void
+): PageFlowNode[] {
   return project.pages.map((page) => ({
     id: page.id,
     type: 'pageNode',
@@ -87,32 +91,38 @@ function buildFlowEdges(project: Project): RouteFlowEdge[] {
 function PageGraphInner() {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
-
   const [newPageName, setNewPageName] = useState('');
+  const [projects, setProjects] = useState<Project[]>(() => loadProjects());
 
-  if (!projectId) return <div>Invalid project ID</div>;
+  const handleEditPage = useCallback(
+    (pageId: string) => {
+      if (!projectId) return;
+      void navigate(`/project/${projectId}/page/${pageId}`);
+    },
+    [navigate, projectId]
+  );
 
-  const projects = loadProjects();
-  const project = projects.find((p) => p.id === projectId);
+  const project = projectId ? projects.find((p) => p.id === projectId) : undefined;
 
-  if (!project) return <div>Project not found</div>;
+  const initialNodes = useMemo(
+    () => (project && projectId ? buildFlowNodes(project, projectId, handleEditPage) : []),
+    // Computed once on mount; ReactFlow owns node state after initialization
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
 
-  function handleEditPage(pageId: string) {
-    if (!projectId) return;
-    void navigate(`/project/${projectId}/page/${pageId}`);
-  }
+  const initialEdges = useMemo(
+    () => (project ? buildFlowEdges(project) : []),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
 
-  const initialNodes = buildFlowNodes(project, projectId, handleEditPage);
-  const initialEdges = buildFlowEdges(project);
-
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const [nodes, , onNodesChange] = useNodesState<PageFlowNode>(initialNodes);
-  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const [nodes, setNodes, onNodesChange] = useNodesState<PageFlowNode>(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState<RouteFlowEdge>(initialEdges);
 
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   const onConnect: OnConnect = useCallback(
     (connection: Connection) => {
+      if (!projectId) return;
       setEdges((eds) => addEdge(connection, eds));
       const updated = projects.map((p) => {
         if (p.id !== projectId) return p;
@@ -127,49 +137,65 @@ function PageGraphInner() {
         return { ...p, routes: [...p.routes, newRoute] };
       });
       saveProjects(updated);
+      setProjects(updated);
     },
     [setEdges, projects, projectId]
   );
 
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const nodeTypes = useMemo(
-    () => ({ pageNode: PageFlowNodeComponent }),
-    []
-  );
+  const nodeTypes = useMemo(() => ({ pageNode: PageFlowNodeComponent }), []);
+
+  if (!projectId) return <div>Invalid project ID</div>;
+  if (!project) return <div>Project not found</div>;
 
   function handleAddPage() {
-    if (!newPageName.trim()) return;
+    if (!newPageName.trim() || !projectId) return;
+    const newPage: PageNode = {
+      id: `page-${Date.now()}`,
+      name: newPageName.trim(),
+      components: [],
+      componentStyles: {},
+      pageStyle: {
+        backgroundColor: '#ffffff',
+        color: '#000000',
+        fontFamily: 'sans-serif',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '8px',
+        padding: '16px',
+      },
+      ifAnnotations: [],
+      forAnnotations: [],
+      stateAnnotation: '',
+      position: { x: Math.random() * 400, y: Math.random() * 300 },
+    };
     const updated = projects.map((p) => {
       if (p.id !== projectId) return p;
-      const newPage: PageNode = {
-        id: `page-${Date.now()}`,
-        name: newPageName.trim(),
-        components: [],
-        componentStyles: {},
-        pageStyle: {
-          backgroundColor: '#ffffff',
-          color: '#000000',
-          fontFamily: 'sans-serif',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '8px',
-          padding: '16px',
-        },
-        ifAnnotations: [],
-        forAnnotations: [],
-        stateAnnotation: '',
-        position: { x: Math.random() * 400, y: Math.random() * 300 },
-      };
       return { ...p, pages: [...p.pages, newPage] };
     });
     saveProjects(updated);
+    setProjects(updated);
+
+    const newNode: PageFlowNode = {
+      id: newPage.id,
+      type: 'pageNode',
+      position: newPage.position,
+      data: { page: newPage, projectId, onEditPage: handleEditPage },
+    };
+    setNodes((ns) => [...ns, newNode]);
     setNewPageName('');
-    window.location.reload();
   }
 
   return (
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <div style={{ padding: '8px', display: 'flex', gap: '8px', alignItems: 'center', background: '#f5f5f5' }}>
+      <div
+        style={{
+          padding: '8px',
+          display: 'flex',
+          gap: '8px',
+          alignItems: 'center',
+          background: '#f5f5f5',
+        }}
+      >
         <button onClick={() => void navigate(`/project/${projectId}`)}>← Back</button>
         <strong>Page Graph: {project.name}</strong>
         <input

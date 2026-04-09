@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { loadProjects, saveProjects } from '../storage';
-import type { IfAnnotation, ForAnnotation } from '../types';
+import type { IfAnnotation, ForAnnotation, Project } from '../types';
 
 export default function LogicAnnotations() {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
+  const [projects, setProjects] = useState<Project[]>(() => loadProjects());
   const [newIfDesc, setNewIfDesc] = useState('');
   const [newForDesc, setNewForDesc] = useState('');
   const [newForAttr, setNewForAttr] = useState('');
@@ -13,7 +14,6 @@ export default function LogicAnnotations() {
 
   if (!projectId) return <div>Invalid project ID</div>;
 
-  const projects = loadProjects();
   const project = projects.find((p) => p.id === projectId);
   if (!project) return <div>Project not found</div>;
 
@@ -21,9 +21,9 @@ export default function LogicAnnotations() {
     ? project.pages.find((pg) => pg.id === selectedPageId)
     : project.pages[0];
 
-  function saveAndReload(updated: typeof projects) {
+  function applyProjects(updated: Project[]) {
     saveProjects(updated);
-    window.location.reload();
+    setProjects(updated);
   }
 
   function handleAddIfAnnotation() {
@@ -42,7 +42,8 @@ export default function LogicAnnotations() {
         }),
       };
     });
-    saveAndReload(updatedProjects);
+    setNewIfDesc('');
+    applyProjects(updatedProjects);
   }
 
   function handleAddForAnnotation() {
@@ -62,7 +63,9 @@ export default function LogicAnnotations() {
         }),
       };
     });
-    saveAndReload(updatedProjects);
+    setNewForDesc('');
+    setNewForAttr('');
+    applyProjects(updatedProjects);
   }
 
   function handleDeleteIfAnnotation(pageId: string, annotId: string) {
@@ -76,7 +79,7 @@ export default function LogicAnnotations() {
         }),
       };
     });
-    saveAndReload(updatedProjects);
+    applyProjects(updatedProjects);
   }
 
   function handleDeleteForAnnotation(pageId: string, annotId: string) {
@@ -90,7 +93,7 @@ export default function LogicAnnotations() {
         }),
       };
     });
-    saveAndReload(updatedProjects);
+    applyProjects(updatedProjects);
   }
 
   return (

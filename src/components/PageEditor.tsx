@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { loadProjects, saveProjects } from '../storage';
-import type { PageComponent, ComponentKind } from '../types';
+import type { PageComponent, ComponentKind, Project } from '../types';
 
 function createComponent(kind: ComponentKind): PageComponent {
   const id = `comp-${Date.now()}`;
@@ -28,18 +28,18 @@ const COMPONENT_KINDS: ComponentKind[] = ['Text', 'TextBox', 'TextArea', 'CheckB
 export default function PageEditor() {
   const { projectId, pageId } = useParams<{ projectId: string; pageId: string }>();
   const navigate = useNavigate();
+  const [projects, setProjects] = useState<Project[]>(() => loadProjects());
   const [selectedKind, setSelectedKind] = useState<ComponentKind>('Text');
 
   if (!projectId || !pageId) return <div>Invalid parameters</div>;
 
-  const projects = loadProjects();
   const project = projects.find((p) => p.id === projectId);
   if (!project) return <div>Project not found</div>;
 
   const page = project.pages.find((pg) => pg.id === pageId);
   if (!page) return <div>Page not found</div>;
 
-  function saveComponent(updated: PageComponent[]) {
+  function applyComponents(updated: PageComponent[]) {
     const updatedProjects = projects.map((p) => {
       if (p.id !== projectId) return p;
       return {
@@ -51,27 +51,24 @@ export default function PageEditor() {
       };
     });
     saveProjects(updatedProjects);
-    window.location.reload();
+    setProjects(updatedProjects);
   }
 
-  function handleAddComponent() {
-    if (!page) return;
+  function handleAddComponent(currentComponents: PageComponent[]) {
     const newComp = createComponent(selectedKind);
-    saveComponent([...page.components, newComp]);
+    applyComponents([...currentComponents, newComp]);
   }
 
-  function handleDeleteComponent(compId: string) {
-    if (!page) return;
-    saveComponent(page.components.filter((c) => c.id !== compId));
+  function handleDeleteComponent(compId: string, currentComponents: PageComponent[]) {
+    applyComponents(currentComponents.filter((c) => c.id !== compId));
   }
 
-  function handleUpdateText(compId: string, field: string, value: string) {
-    if (!page) return;
-    const updated = page.components.map((c) => {
+  function handleUpdateText(compId: string, field: string, value: string, currentComponents: PageComponent[]) {
+    const updated = currentComponents.map((c) => {
       if (c.id !== compId) return c;
       return { ...c, [field]: value };
     });
-    saveComponent(updated);
+    applyComponents(updated);
   }
 
   return (
@@ -89,7 +86,7 @@ export default function PageEditor() {
             <option key={k} value={k}>{k}</option>
           ))}
         </select>
-        <button onClick={handleAddComponent}>Add Component</button>
+        <button onClick={() => handleAddComponent(page.components)}>Add Component</button>
       </div>
       <h2>Components ({page.components.length})</h2>
       {page.components.length === 0 && <p>No components yet.</p>}
@@ -101,7 +98,7 @@ export default function PageEditor() {
               <input
                 value={comp.content}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  handleUpdateText(comp.id, 'content', e.target.value)
+                  handleUpdateText(comp.id, 'content', e.target.value, page.components)
                 }
                 placeholder="Content"
               />
@@ -111,14 +108,14 @@ export default function PageEditor() {
                 <input
                   value={comp.content}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    handleUpdateText(comp.id, 'content', e.target.value)
+                    handleUpdateText(comp.id, 'content', e.target.value, page.components)
                   }
                   placeholder="Heading text"
                 />
                 <select
                   value={comp.level}
                   onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-                    handleUpdateText(comp.id, 'level', e.target.value)
+                    handleUpdateText(comp.id, 'level', e.target.value, page.components)
                   }
                 >
                   {[1, 2, 3, 4, 5, 6].map((l) => (
@@ -131,7 +128,7 @@ export default function PageEditor() {
               <input
                 value={comp.name}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  handleUpdateText(comp.id, 'name', e.target.value)
+                  handleUpdateText(comp.id, 'name', e.target.value, page.components)
                 }
                 placeholder="Field name"
               />
@@ -140,12 +137,12 @@ export default function PageEditor() {
               <input
                 value={comp.label}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  handleUpdateText(comp.id, 'label', e.target.value)
+                  handleUpdateText(comp.id, 'label', e.target.value, page.components)
                 }
                 placeholder="Button label"
               />
             )}
-            <button onClick={() => handleDeleteComponent(comp.id)}>Delete</button>
+            <button onClick={() => handleDeleteComponent(comp.id, page.components)}>Delete</button>
           </li>
         ))}
       </ul>
